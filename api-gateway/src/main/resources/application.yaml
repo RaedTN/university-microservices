@@ -1,0 +1,59 @@
+server:
+  port: 8088
+
+# JWT Configuration (set JWT_SECRET in the environment; same value as auth and the student service)
+jwt:
+  secret: ${JWT_SECRET}
+
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            # Auth Service - Public (no JWT required)
+            - id: auth
+              uri: http://localhost:8081
+              predicates:
+                - Path=/auth/**
+              filters:
+                - RewritePath=/auth/(?<segment>.*), /api/auth/$\{segment}
+
+            # Student Service - Protected (JWT required via GlobalFilter)
+            - id: students
+              uri: http://localhost:3000
+              predicates:
+                - Path=/students/**
+              filters:
+                # Map /students and /students/... -> /api/students and /api/students/...
+                - RewritePath=/students(?<segment>/?.*), /api/students$\{segment}
+
+            # Grade Service - Protected (JWT required via GlobalFilter)
+            - id: grades
+              uri: http://localhost:8000
+              predicates:
+                - Path=/grades/**
+              filters:
+                - RewritePath=/grades/(?<segment>.*), /grades/$\{segment}
+
+            # Course Service - SOAP (no JWT required)
+            - id: courses
+              uri: http://localhost:8082
+              predicates:
+                - Path=/courses, /courses/**
+              filters:
+                # Rewrite /courses to /course-service (preserves query strings like ?wsdl)
+                - RewritePath=/courses, /course-service
+                # Rewrite /courses/** to /course-service/**
+                - RewritePath=/courses/(?<segment>.*), /course-service/$\{segment}
+
+            # Billing Service - SOAP (no JWT required)
+            - id: billing
+              uri: http://localhost:5064
+              predicates:
+                - Path=/billing, /billing/**
+              filters:
+                # Rewrite /billing to /BillingService.svc (preserves query strings like ?wsdl)
+                - RewritePath=/billing, /BillingService.svc
+                # Rewrite /billing/** to /BillingService.svc/**
+                - RewritePath=/billing/(?<segment>.*), /BillingService.svc/$\{segment}

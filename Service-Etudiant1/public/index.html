@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Étudiants</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Gestion des Étudiants</h1>
+            <p class="subtitle">Service REST avec authentification JWT</p>
+        </header>
+
+        <!-- Section Authentification -->
+        <section class="auth-section">
+            <div class="card">
+                <h2>🔐 Authentification JWT</h2>
+                <div class="auth-info">
+                    <p><strong>Comment utiliser :</strong></p>
+                    <ol>
+                        <li>Cliquez sur "Générer un Token" pour créer un token JWT de test</li>
+                        <li>Le token sera automatiquement enregistré</li>
+                        <li>Vous pouvez maintenant utiliser toutes les fonctionnalités CRUD</li>
+                    </ol>
+                </div>
+                <div class="auth-form">
+                    <button onclick="generateToken()" class="btn btn-success">🎫 Générer un Token</button>
+                    <input 
+                        type="text" 
+                        id="jwtToken" 
+                        placeholder="Ou entrez votre token JWT manuellement"
+                        class="token-input"
+                    >
+                    <button onclick="saveToken()" class="btn btn-primary">Enregistrer le Token</button>
+                    <button onclick="clearToken()" class="btn btn-secondary">Effacer</button>
+                </div>
+                <div id="tokenStatus" class="token-status"></div>
+            </div>
+        </section>
+
+        <!-- Formulaire d'ajout/modification -->
+        <section class="form-section">
+            <div class="card">
+                <h2 id="formTitle">➕ Ajouter un Étudiant</h2>
+                <form id="studentForm" onsubmit="handleSubmit(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="studentNumber">Numéro Étudiant *</label>
+                            <input type="text" id="studentNumber" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="firstName">Prénom *</label>
+                            <input type="text" id="firstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Nom *</label>
+                            <input type="text" id="lastName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dateOfBirth">Date de Naissance *</label>
+                            <input type="date" id="dateOfBirth" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Téléphone</label>
+                            <input type="tel" id="phone">
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="address">Adresse</label>
+                            <input type="text" id="address">
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-success" id="submitBtn">Ajouter</button>
+                        <button type="button" onclick="resetForm()" class="btn btn-secondary" id="cancelBtn" style="display: none;">Annuler</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Liste des étudiants -->
+        <section class="list-section">
+            <div class="card">
+                <div class="list-header">
+                    <h2>📋 Liste des Étudiants</h2>
+                    <button onclick="loadStudents()" class="btn btn-primary">🔄 Actualiser</button>
+                </div>
+                <div id="loading" class="loading" style="display: none;">Chargement...</div>
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
+                <div id="studentsList" class="students-list"></div>
+                <div id="pagination" class="pagination"></div>
+            </div>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+
