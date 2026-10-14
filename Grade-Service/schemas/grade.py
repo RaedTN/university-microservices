@@ -10,6 +10,7 @@ class GradeBase(BaseModel):
     student_id: int = Field(..., ge=1, description="Student identifier")
     course_id: int = Field(..., ge=1, description="Course identifier")
     grade: float = Field(..., ge=0, le=20, description="Grade value (0-20 scale)")
+    student_email: Optional[str] = Field(None, description="Student email used to enforce ownership")
 
 
 class GradeCreate(GradeBase):
@@ -29,6 +30,12 @@ class GradeOut(GradeBase):
 
 class StudentGrades(BaseModel):
     student_id: int
+    notes: List[GradeOut]
+    moyenne: Optional[float]
+
+
+class EmailGrades(BaseModel):
+    student_email: str
     notes: List[GradeOut]
     moyenne: Optional[float]
 

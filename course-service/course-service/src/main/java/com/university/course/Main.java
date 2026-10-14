@@ -1,7 +1,13 @@
 package com.university.course;
 
-import com.university.course.service.CourseServiceImpl;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.xml.ws.Endpoint;
+import javax.xml.ws.handler.Handler;
+
+import com.university.course.security.JwtSoapHandler;
+import com.university.course.service.CourseServiceImpl;
 
 /**
  * Classe principale pour demarrer le serveur SOAP
@@ -11,6 +17,10 @@ public class Main {
     private static final String URL = "http://0.0.0.0:8082/course-service";
 
     public static void main(String[] args) {
+        if (System.getenv("JWT_SECRET") == null || System.getenv("JWT_SECRET").isEmpty()) {
+            System.err.println("[ERROR] JWT_SECRET environment variable is required");
+            return;
+        }
         System.out.println("=====================================");
         System.out.println("  Course Service SOAP - Demarrage...");
         System.out.println("=====================================");
@@ -22,9 +32,12 @@ public class Main {
             CourseServiceImpl implementor = new CourseServiceImpl();
             
             System.out.println("[INFO] Tentative de publication sur " + URL);
-            Endpoint endpoint = Endpoint.publish(URL, implementor);
-            
+            Endpoint endpoint = Endpoint.create(implementor);
             if (endpoint != null) {
+                List<Handler> handlers = new ArrayList<Handler>(endpoint.getBinding().getHandlerChain());
+                handlers.add(new JwtSoapHandler());
+                endpoint.getBinding().setHandlerChain(handlers);
+                endpoint.publish(URL);
                 System.out.println("[SUCCESS] Service SOAP demarré avec succès!");
                 System.out.println("[INFO] URL du service : http://localhost:8082/course-service");
                 System.out.println("[INFO] WSDL disponible à : http://localhost:8082/course-service?wsdl");

@@ -4,7 +4,7 @@ using BillingService.Models;
 
 namespace BillingService.Services
 {
-    [ServiceContract]
+    [ServiceContract(Namespace = "http://billing.university.soa/")]
     public interface IBillingService
     {
         [OperationContract]
@@ -18,5 +18,11 @@ namespace BillingService.Services
 
         [OperationContract]
         PaymentHistory GetPaymentHistory(string studentId);
+
+        [OperationContract]
+        PaymentStatement GenerateStatement(string studentId);
+
+        [OperationContract]
+        bool IsUpToDate(string studentId);
     }
 }

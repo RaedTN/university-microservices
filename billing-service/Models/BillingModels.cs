@@ -30,4 +30,17 @@ namespace BillingService.Models
         public List<Payment> Payments { get; set; } = new();
         public BillingSummary Summary { get; set; } = new();
     }
+
+    public class PaymentStatement
+    {
+        public string StudentId { get; set; } = string.Empty;
+        public string Specialty { get; set; } = string.Empty;
+        public string Level { get; set; } = string.Empty;
+        public decimal TotalAmount { get; set; }
+        public decimal PaidAmount { get; set; }
+        public decimal RemainingAmount { get; set; }
+        public string Status { get; set; } = "UNPAID";
+        public bool UpToDate { get; set; }
+        public List<Payment> Payments { get; set; } = new();
+    }
 }

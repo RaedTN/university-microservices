@@ -1,5 +1,6 @@
 """Entry point for the grade-service FastAPI application."""
 from fastapi import FastAPI
+from sqlalchemy import text
 
 from database.session import Base, async_engine
 from routes.grades import router as grades_router
@@ -24,6 +25,11 @@ def create_app() -> FastAPI:
     async def on_startup() -> None:  # pragma: no cover - side effect
         async with async_engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
+            try:
+                await conn.execute(text("ALTER TABLE grades ADD COLUMN student_email VARCHAR"))
+            except Exception:
+                # Column already exists on databases created after this field was added.
+                pass
 
     return app
 

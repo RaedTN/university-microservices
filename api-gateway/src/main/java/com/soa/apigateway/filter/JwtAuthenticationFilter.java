@@ -13,6 +13,8 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 import javax.crypto.SecretKey;
@@ -23,7 +25,7 @@ import java.nio.charset.StandardCharsets;
  * Validates JWT tokens before forwarding requests to protected services
  */
 @Component
-public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
+public class JwtAuthenticationFilter implements GlobalFilter, WebFilter, Ordered {
 
     @Value("${jwt.secret}")
     private String jwtSecret;
@@ -32,24 +34,32 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     private static final String[] PUBLIC_ROUTES = {
         "/",
         "/health",
-        "/auth",
-        "/courses",
-        "/billing"
+        "/auth/login",
+        "/auth/register"
     };
 
     @Override
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+        return filterRequest(exchange, chain::filter);
+    }
+
+    @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        return filterRequest(exchange, chain::filter);
+    }
+
+    private Mono<Void> filterRequest(ServerWebExchange exchange, java.util.function.Function<ServerWebExchange, Mono<Void>> chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
 
         // Skip authentication for OPTIONS requests (CORS preflight)
         if (request.getMethod() != null && request.getMethod().name().equals("OPTIONS")) {
-            return chain.filter(exchange);
+            return chain.apply(exchange);
         }
 
         // Skip authentication for public routes
         if (isPublicRoute(path)) {
-            return chain.filter(exchange);
+            return chain.apply(exchange);
         }
 
         // Check for Authorization header
@@ -75,7 +85,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                     .header("X-User-Role", claims.get("role") != null ? claims.get("role").toString() : "")
                     .build();
 
-            return chain.filter(exchange.mutate().request(modifiedRequest).build());
+            return chain.apply(exchange.mutate().request(modifiedRequest).build());
         } catch (RuntimeException e) {
             return onError(exchange, e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {

@@ -29,7 +29,7 @@ public class GatewayController {
                     "auth": {
                       "path": "/auth/**",
                       "target": "http://localhost:8081",
-                      "authentication": "Public",
+                      "authentication": "Public for /auth/login and /auth/register only",
                       "type": "REST"
                     },
                     "students": {
@@ -47,16 +47,23 @@ public class GatewayController {
                     "courses": {
                       "path": "/courses/**",
                       "target": "http://localhost:8082",
-                      "authentication": "Public",
+                      "authentication": "JWT Required",
                       "type": "SOAP",
-                      "wsdl": "http://localhost:8088/courses?wsdl"
+                      "wsdl": "http://localhost:8088/courses?wsdl",
+                      "rest": "/rest/courses and /rest/timetable"
                     },
                     "billing": {
                       "path": "/billing/**",
                       "target": "http://localhost:5064",
-                      "authentication": "Public",
+                      "authentication": "JWT Required",
                       "type": "SOAP",
-                      "wsdl": "http://localhost:8088/billing?wsdl"
+                      "wsdl": "http://localhost:8088/billing?wsdl",
+                      "rest": "/rest/billing"
+                    },
+                    "overview": {
+                      "path": "/students/{id}/overview",
+                      "authentication": "JWT Required",
+                      "type": "REST"
                     }
                   },
                   "documentation": {

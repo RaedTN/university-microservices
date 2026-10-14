@@ -42,10 +42,12 @@ The student service expects `mongodb://localhost:27017/students`.
 cd C:\Users\Raed\Desktop\projet-soa\auth-service
 $env:JWT_SECRET = "change-me-to-a-long-shared-secret"
 $env:MYSQL_PASSWORD = "change-me"
+$env:ADMIN_EMAIL = "admin@university.local"
+$env:ADMIN_PASSWORD = "change-me"
 .\mvnw.cmd spring-boot:run
 ```
 
-Wait until the log says the app is listening on 8081. Check: `http://localhost:8081/api/auth/login` (a POST without a body returns 400, which means the process is up).
+Wait until the log says the app is listening on 8081. On startup, if `ADMIN_EMAIL` is not already in `authdb`, the service creates that account with role `ADMIN`. Check: `http://localhost:8081/api/auth/login` (a POST without a body returns 400, which means the process is up).
 
 ## 3. Student service (port 3000)
 
@@ -81,6 +83,7 @@ Swagger (no JWT): `http://localhost:8000/docs`.
 
 ```powershell
 cd C:\Users\Raed\Desktop\projet-soa\course-service\course-service
+$env:JWT_SECRET = "change-me-to-a-long-shared-secret"
 $env:MYSQL_PASSWORD = "change-me"
 .\mvnw.cmd clean package
 java -jar target\course-service-1.0-SNAPSHOT.jar
@@ -96,6 +99,7 @@ The process starts without MySQL. The first SOAP call fails if `university_db` w
 
 ```powershell
 cd C:\Users\Raed\Desktop\projet-soa\billing-service
+$env:JWT_SECRET = "change-me-to-a-long-shared-secret"
 dotnet run
 ```
 

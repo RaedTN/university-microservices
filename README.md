@@ -195,11 +195,17 @@ Une fois tous les services démarrés, vous pouvez accéder aux services via l'A
 - `GET  http://localhost:8088/grades/student/{studentId}`
 - `POST http://localhost:8088/grades`
 
-### Courses (SOAP)
+### Courses (JWT requis, SOAP et REST)
 - `GET  http://localhost:8088/courses?wsdl`
+- `GET  http://localhost:8088/rest/courses`
+- `GET  http://localhost:8088/rest/timetable`
 
-### Billing (SOAP)
+### Billing (JWT requis, SOAP et REST)
 - `GET  http://localhost:8088/billing?wsdl`
+- `GET  http://localhost:8088/rest/billing/status?studentId=student@example.com`
+
+### Overview (JWT requis)
+- `GET  http://localhost:8088/students/{id}/overview`
 
 ---
 

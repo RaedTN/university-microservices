@@ -11,7 +11,7 @@ spring:
       server:
         webflux:
           routes:
-            # Auth Service - Public (no JWT required)
+            # Auth Service - login and register are public; other /auth paths require JWT
             - id: auth
               uri: http://localhost:8081
               predicates:
@@ -36,7 +36,7 @@ spring:
               filters:
                 - RewritePath=/grades/(?<segment>.*), /grades/$\{segment}
 
-            # Course Service - SOAP (no JWT required)
+            # Course Service - SOAP (JWT required)
             - id: courses
               uri: http://localhost:8082
               predicates:
@@ -47,7 +47,7 @@ spring:
                 # Rewrite /courses/** to /course-service/**
                 - RewritePath=/courses/(?<segment>.*), /course-service/$\{segment}
 
-            # Billing Service - SOAP (no JWT required)
+            # Billing Service - SOAP (JWT required)
             - id: billing
               uri: http://localhost:5064
               predicates:

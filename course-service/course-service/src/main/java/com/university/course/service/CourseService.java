@@ -1,6 +1,7 @@
 package com.university.course.service;
 
 import com.university.course.model.Course;
+import com.university.course.model.TimetableSlot;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
@@ -91,5 +92,33 @@ public interface CourseService {
         @WebParam(name = "room") String room,
         @WebParam(name = "schedule") String schedule
     );
+
+    @WebMethod
+    TimetableSlot addTimetableSlot(
+        @WebParam(name = "courseId") Long courseId,
+        @WebParam(name = "day") String day,
+        @WebParam(name = "startTime") String startTime,
+        @WebParam(name = "endTime") String endTime,
+        @WebParam(name = "room") String room
+    );
+
+    @WebMethod
+    TimetableSlot updateTimetableSlot(
+        @WebParam(name = "id") Long id,
+        @WebParam(name = "courseId") Long courseId,
+        @WebParam(name = "day") String day,
+        @WebParam(name = "startTime") String startTime,
+        @WebParam(name = "endTime") String endTime,
+        @WebParam(name = "room") String room
+    );
+
+    @WebMethod
+    boolean deleteTimetableSlot(@WebParam(name = "id") Long id);
+
+    @WebMethod
+    TimetableSlot[] getAllTimetableSlots();
+
+    @WebMethod
+    TimetableSlot[] getTimetableByCourse(@WebParam(name = "courseId") Long courseId);
 }
 

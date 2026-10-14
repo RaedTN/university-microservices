@@ -17,3 +17,12 @@ CREATE TABLE IF NOT EXISTS courses (
     schedule VARCHAR(100)
 );
 
+CREATE TABLE IF NOT EXISTS timetable_slots (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    course_id INT NOT NULL,
+    day VARCHAR(20) NOT NULL,
+    start_time VARCHAR(10) NOT NULL,
+    end_time VARCHAR(10) NOT NULL,
+    room VARCHAR(50) NOT NULL
+);
+

@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "soa-project-collection",
 		"name": "SOA Project API Gateway",
-		"description": "Complete collection for testing SOA Project microservices through API Gateway",
+		"description": "Gateway tests for auth roles, students, grades, course and billing REST adapters, timetable, and the student overview.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -11,139 +11,273 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"url": {
-					"raw": "http://localhost:8088/health",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8088",
-					"path": [
-						"health"
-					]
-				},
-				"description": "Check if API Gateway is running"
-			}
+				"url": "http://localhost:8088/health"
+			},
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('status code', function () {",
+							"    pm.expect([200]).to.include(pm.response.code);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			]
 		},
 		{
 			"name": "2. API Gateway Info",
 			"request": {
 				"method": "GET",
 				"header": [],
-				"url": {
-					"raw": "http://localhost:8088/",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8088",
-					"path": [
-						""
-					]
-				},
-				"description": "Get API Gateway information and available routes"
-			}
-		},
-		{
-			"name": "Auth Service",
-			"item": [
+				"url": "http://localhost:8088/"
+			},
+			"event": [
 				{
-					"name": "Register User",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    var jsonData = pm.response.json();",
-									"    if (jsonData.token) {",
-									"        pm.environment.set(\"jwt_token\", jsonData.token);",
-									"        console.log(\"Token saved to environment!\");",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('status code', function () {",
+							"    pm.expect([200]).to.include(pm.response.code);",
+							"});"
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"ETUDIANT\"\n}"
-						},
-						"url": {
-							"raw": "http://localhost:8088/auth/register",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8088",
-							"path": [
-								"auth",
-								"register"
-							]
-						},
-						"description": "Register a new user and get JWT token. Token is automatically saved to environment."
-					}
-				},
-				{
-					"name": "Login",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    var jsonData = pm.response.json();",
-									"    if (jsonData.token) {",
-									"        pm.environment.set(\"jwt_token\", jsonData.token);",
-									"        console.log(\"Token saved to environment!\");",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
-						},
-						"url": {
-							"raw": "http://localhost:8088/auth/login",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8088",
-							"path": [
-								"auth",
-								"login"
-							]
-						},
-						"description": "Login and get JWT token. Token is automatically saved to environment."
+						"type": "text/javascript"
 					}
 				}
 			]
 		},
 		{
-			"name": "Student Service",
+			"name": "Auth",
 			"item": [
+				{
+					"name": "Register Student",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('status code', function () {",
+									"    pm.expect([200,400]).to.include(pm.response.code);",
+									"});",
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('jwt_token', jsonData.token);",
+									"    pm.environment.set('jwt_student', jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"student@university.local\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": "http://localhost:8088/auth/register"
+					}
+				},
+				{
+					"name": "Login Student",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('status code', function () {",
+									"    pm.expect([200]).to.include(pm.response.code);",
+									"});",
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('jwt_token', jsonData.token);",
+									"    pm.environment.set('jwt_student', jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"student@university.local\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": "http://localhost:8088/auth/login"
+					}
+				},
+				{
+					"name": "Login Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('status code', function () {",
+									"    pm.expect([200]).to.include(pm.response.code);",
+									"});",
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('jwt_admin', jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@university.local\",\n  \"password\": \"change-me\"\n}"
+						},
+						"url": "http://localhost:8088/auth/login"
+					}
+				},
+				{
+					"name": "Create Teacher",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('status code', function () {",
+									"    pm.expect([200,400]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_admin}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"teacher@university.local\",\n  \"password\": \"password123\",\n  \"role\": \"ENSEIGNANT\"\n}"
+						},
+						"url": "http://localhost:8088/auth/users"
+					}
+				},
+				{
+					"name": "Login Teacher",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('status code', function () {",
+									"    pm.expect([200]).to.include(pm.response.code);",
+									"});",
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('jwt_teacher', jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"teacher@university.local\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": "http://localhost:8088/auth/login"
+					}
+				}
+			]
+		},
+		{
+			"name": "Students",
+			"item": [
+				{
+					"name": "Create Student",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('status code', function () {",
+									"    pm.expect([201,400]).to.include(pm.response.code);",
+									"});",
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('student_id', jsonData.data._id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_admin}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentNumber\": \"STU9001\",\n  \"firstName\": \"Samira\",\n  \"lastName\": \"Benali\",\n  \"email\": \"student@university.local\",\n  \"dateOfBirth\": \"2002-04-12\"\n}"
+						},
+						"url": "http://localhost:8088/students"
+					}
+				},
 				{
 					"name": "Get All Students",
 					"request": {
@@ -152,143 +286,101 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{jwt_token}}",
+									"value": "{{jwt_teacher}}",
 									"type": "string"
 								}
 							]
 						},
 						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8088/students",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8088",
-							"path": [
-								"students"
-							]
-						},
-						"description": "Get list of all students (requires JWT token)"
-					}
-				},
-				{
-					"name": "Get Student by ID",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8088/students/:id",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8088",
-							"path": [
-								"students",
-								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": "STUDENT_ID_HERE"
-								}
-							]
-						},
-						"description": "Get a specific student by ID (replace :id with actual student ID)"
-					}
-				},
-				{
-					"name": "Create Student",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
+						"url": "http://localhost:8088/students?limit=100"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('status code', function () {",
+									"    pm.expect([200]).to.include(pm.response.code);",
+									"});",
+									"if (pm.response.code === 200) {",
+									"    var rows = (pm.response.json().data) || [];",
+									"    for (var i = 0; i < rows.length; i++) {",
+									"        if (rows[i].email === \"student@university.local\") {",
+									"            pm.environment.set(\"student_id\", rows[i]._id);",
+									"        }",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
 							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"studentNumber\": \"STU001\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"dateOfBirth\": \"2000-01-15\",\n  \"phone\": \"+33123456789\",\n  \"address\": \"123 Main Street, Paris\"\n}"
-						},
-						"url": {
-							"raw": "http://localhost:8088/students",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8088",
-							"path": [
-								"students"
+						}
+					]
+				},
+				{
+					"name": "Get Own Student",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_student}}",
+									"type": "string"
+								}
 							]
 						},
-						"description": "Create a new student (requires JWT token)"
-					}
+						"method": "GET",
+						"url": "http://localhost:8088/students/{{student_id}}"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('status code', function () {",
+									"    pm.expect([200]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Overview",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_student}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"url": "http://localhost:8088/students/{{student_id}}/overview"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('status code', function () {",
+									"    pm.expect([200]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
 				}
 			]
 		},
 		{
-			"name": "Grade Service",
+			"name": "Grades",
 			"item": [
-				{
-					"name": "Get Grades for Student",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8088/grades/student/:studentId",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8088",
-							"path": [
-								"grades",
-								"student",
-								":studentId"
-							],
-							"variable": [
-								{
-									"key": "studentId",
-									"value": "1"
-								}
-							]
-						},
-						"description": "Get all grades for a specific student (requires JWT token)"
-					}
-				},
 				{
 					"name": "Create Grade",
 					"request": {
@@ -297,7 +389,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{jwt_token}}",
+									"value": "{{jwt_teacher}}",
 									"type": "string"
 								}
 							]
@@ -311,90 +403,410 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"student_id\": 1,\n  \"course_id\": 1,\n  \"grade\": 15\n}"
+							"raw": "{\n  \"student_id\": 1,\n  \"course_id\": 1,\n  \"grade\": 15,\n  \"student_email\": \"student@university.local\"\n}"
 						},
-						"url": {
-							"raw": "http://localhost:8088/grades",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8088",
-							"path": [
-								"grades"
+						"url": "http://localhost:8088/grades"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('status code', function () {",
+									"    pm.expect([201]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get Own Grades",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_student}}",
+									"type": "string"
+								}
 							]
 						},
-						"description": "Create a new grade (requires JWT token)"
-					}
+						"method": "GET",
+						"url": "http://localhost:8088/grades/by-email?email=student@university.local"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('status code', function () {",
+									"    pm.expect([200]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
 				}
 			]
 		},
 		{
-			"name": "Course Service (SOAP)",
+			"name": "Courses REST",
 			"item": [
 				{
-					"name": "Get WSDL",
+					"name": "Add Course",
 					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8088/courses?wsdl",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8088",
-							"path": [
-								"courses"
-							],
-							"query": [
+						"auth": {
+							"type": "bearer",
+							"bearer": [
 								{
-									"key": "wsdl",
-									"value": ""
+									"key": "token",
+									"value": "{{jwt_teacher}}",
+									"type": "string"
 								}
 							]
 						},
-						"description": "Get the WSDL definition for Course Service"
-					}
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code\": \"INF101\",\n  \"name\": \"Programmation\",\n  \"description\": \"Java\",\n  \"credits\": 4,\n  \"professor\": \"Dr Smith\",\n  \"semester\": \"S1\",\n  \"maxStudents\": 30,\n  \"room\": \"A1\",\n  \"schedule\": \"Monday 08:00\"\n}"
+						},
+						"url": "http://localhost:8088/rest/courses"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('status code', function () {",
+									"    pm.expect([200,400]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "List Courses",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_student}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"url": "http://localhost:8088/rest/courses"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('status code', function () {",
+									"    pm.expect([200]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Add Timetable Slot",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_teacher}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"courseId\": 1,\n  \"day\": \"Monday\",\n  \"startTime\": \"08:00\",\n  \"endTime\": \"10:00\",\n  \"room\": \"A1\"\n}"
+						},
+						"url": "http://localhost:8088/rest/timetable"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('status code', function () {",
+									"    pm.expect([200,400]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "List Timetable",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_student}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"url": "http://localhost:8088/rest/timetable"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('status code', function () {",
+									"    pm.expect([200]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
 				}
 			]
 		},
 		{
-			"name": "Billing Service (SOAP)",
+			"name": "Billing REST",
 			"item": [
 				{
-					"name": "Get WSDL",
+					"name": "Calculate Fees",
 					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8088/billing?wsdl",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8088",
-							"path": [
-								"billing"
-							],
-							"query": [
+						"auth": {
+							"type": "bearer",
+							"bearer": [
 								{
-									"key": "wsdl",
-									"value": ""
+									"key": "token",
+									"value": "{{jwt_admin}}",
+									"type": "string"
 								}
 							]
 						},
-						"description": "Get the WSDL definition for Billing Service"
-					}
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"student@university.local\",\n  \"specialty\": \"GL\",\n  \"level\": \"L1\"\n}"
+						},
+						"url": "http://localhost:8088/rest/billing/fees"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('status code', function () {",
+									"    pm.expect([200]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Add Payment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_admin}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"student@university.local\",\n  \"amount\": 1200\n}"
+						},
+						"url": "http://localhost:8088/rest/billing/payments"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('status code', function () {",
+									"    pm.expect([200]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Statement",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_student}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"url": "http://localhost:8088/rest/billing/statement?studentId=student@university.local"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('status code', function () {",
+									"    pm.expect([200]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Up To Date",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_student}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"url": "http://localhost:8088/rest/billing/up-to-date?studentId=student@university.local"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('status code', function () {",
+									"    pm.expect([200]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
 				}
 			]
-		}
-	],
-	"variable": [
+		},
 		{
-			"key": "base_url",
-			"value": "http://localhost:8088"
+			"name": "SOAP WSDL",
+			"item": [
+				{
+					"name": "Course WSDL",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_admin}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"url": "http://localhost:8088/courses?wsdl"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('status code', function () {",
+									"    pm.expect([200]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Billing WSDL",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_admin}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"url": "http://localhost:8088/billing?wsdl"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('status code', function () {",
+									"    pm.expect([200]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
 		}
 	]
 }
-
