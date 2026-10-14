@@ -2,6 +2,7 @@ package com.soa.apigateway.controller;
 
 import com.soa.apigateway.soap.SoapClient;
 import com.soa.apigateway.soap.SoapXml;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,13 +22,14 @@ import java.util.Map;
 @RestController
 public class CourseRestController {
 
-    private static final String URL = "http://localhost:8082/course-service";
     private static final String NS = "http://service.course.university.com/";
 
     private final SoapClient soapClient;
+    private final String url;
 
-    public CourseRestController(SoapClient soapClient) {
+    public CourseRestController(SoapClient soapClient, @Value("${services.courses.url}") String coursesUrl) {
         this.soapClient = soapClient;
+        this.url = coursesUrl + "/course-service";
     }
 
     @GetMapping("/rest/courses")
@@ -105,7 +107,7 @@ public class CourseRestController {
     }
 
     private Mono<ResponseEntity<Object>> call(String authorization, String body, boolean list) {
-        return soapClient.call(URL, NS, body, authorization)
+        return soapClient.call(url, NS, body, authorization)
                 .map(result -> toResponse(result.status(), result.body(), list))
                 .onErrorResume(error -> Mono.just(entity(HttpStatus.BAD_GATEWAY, Map.of("error", "Course service unavailable"))));
     }

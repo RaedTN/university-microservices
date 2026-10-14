@@ -36,7 +36,8 @@ public class TimetableRepository {
         if (password == null || password.isEmpty()) {
             throw new SQLException("MYSQL_PASSWORD environment variable is required");
         }
-        String url = "jdbc:mysql://" + host + ":" + port + "/" + database;
+        String url = "jdbc:mysql://" + host + ":" + port + "/" + database
+                + "?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
         return DriverManager.getConnection(url, user, password);
     }
 

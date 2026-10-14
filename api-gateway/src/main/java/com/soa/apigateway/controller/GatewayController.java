@@ -1,5 +1,6 @@
 package com.soa.apigateway.controller;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -16,6 +17,21 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
 @Configuration
 public class GatewayController {
 
+    @Value("${services.auth.url}")
+    private String authUrl;
+
+    @Value("${services.students.url}")
+    private String studentsUrl;
+
+    @Value("${services.grades.url}")
+    private String gradesUrl;
+
+    @Value("${services.courses.url}")
+    private String coursesUrl;
+
+    @Value("${services.billing.url}")
+    private String billingUrl;
+
     @Bean
     public RouterFunction<ServerResponse> gatewayRoutes() {
         return route(GET("/"), request -> {
@@ -28,25 +44,25 @@ public class GatewayController {
                   "routes": {
                     "auth": {
                       "path": "/auth/**",
-                      "target": "http://localhost:8081",
+                      "target": "%s",
                       "authentication": "Public for /auth/login and /auth/register only",
                       "type": "REST"
                     },
                     "students": {
                       "path": "/students/**",
-                      "target": "http://localhost:3000",
+                      "target": "%s",
                       "authentication": "JWT Required",
                       "type": "REST"
                     },
                     "grades": {
                       "path": "/grades/**",
-                      "target": "http://localhost:8000",
+                      "target": "%s",
                       "authentication": "JWT Required",
                       "type": "REST"
                     },
                     "courses": {
                       "path": "/courses/**",
-                      "target": "http://localhost:8082",
+                      "target": "%s",
                       "authentication": "JWT Required",
                       "type": "SOAP",
                       "wsdl": "http://localhost:8088/courses?wsdl",
@@ -54,7 +70,7 @@ public class GatewayController {
                     },
                     "billing": {
                       "path": "/billing/**",
-                      "target": "http://localhost:5064",
+                      "target": "%s",
                       "authentication": "JWT Required",
                       "type": "SOAP",
                       "wsdl": "http://localhost:8088/billing?wsdl",
@@ -71,7 +87,7 @@ public class GatewayController {
                     "usage": "Access services through /auth, /students, /grades, /courses, or /billing"
                   }
                 }
-                """;
+                """.formatted(authUrl, studentsUrl, gradesUrl, coursesUrl, billingUrl);
             return ok().contentType(MediaType.APPLICATION_JSON).bodyValue(json);
         })
         .andRoute(GET("/health"), request -> {

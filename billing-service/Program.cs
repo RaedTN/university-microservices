@@ -16,7 +16,12 @@ if (string.IsNullOrWhiteSpace(jwtSecret))
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSoapCore();
-builder.Services.AddSingleton(new BillingDatabase(Path.Combine(builder.Environment.ContentRootPath, "billing.db")));
+var databasePath = Environment.GetEnvironmentVariable("BILLING_DB_PATH");
+if (string.IsNullOrWhiteSpace(databasePath))
+{
+    databasePath = Path.Combine(builder.Environment.ContentRootPath, "billing.db");
+}
+builder.Services.AddSingleton(new BillingDatabase(databasePath));
 builder.Services.AddSingleton<IBillingService, BillingServiceImpl>();
 
 var app = builder.Build();

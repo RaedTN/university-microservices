@@ -1,0 +1,10 @@
+bin
+obj
+.git
+.idea
+.vscode
+*.md
+*.db
+.env
+.env.*
+!.env.example

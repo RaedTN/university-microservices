@@ -1,0 +1,151 @@
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init-db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  mongo:
+    image: mongo:7
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27018:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  auth:
+    build: ./auth-service
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/authdb?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-s", "-o", "/dev/null", "http://127.0.0.1:8081/api/auth/login"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+
+  students:
+    build: ./Service-Etudiant1
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      PORT: "3000"
+      MONGODB_URI: mongodb://mongo:27017/students
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+
+  grades:
+    build: ./Grade-Service
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      DATABASE_URL: sqlite+aiosqlite:////data/grades.db
+    volumes:
+      - grades_data:/data
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+
+  courses:
+    build: ./course-service/course-service
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      MYSQL_HOST: mysql
+      MYSQL_PORT: "3306"
+      MYSQL_DATABASE: university_db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:8082/course-service?wsdl"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  billing:
+    build: ./billing-service
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      BILLING_DB_PATH: /data/billing.db
+    volumes:
+      - billing_data:/data
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:5064/BillingService.svc?wsdl"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  gateway:
+    build: ./api-gateway
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      AUTH_SERVICE_URL: http://auth:8081
+      STUDENT_SERVICE_URL: http://students:3000
+      GRADE_SERVICE_URL: http://grades:8000
+      COURSE_SERVICE_URL: http://courses:8082
+      BILLING_SERVICE_URL: http://billing:5064
+    ports:
+      - "8088:8088"
+    depends_on:
+      auth:
+        condition: service_healthy
+      students:
+        condition: service_healthy
+      grades:
+        condition: service_healthy
+      courses:
+        condition: service_healthy
+      billing:
+        condition: service_healthy
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:8088/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+
+volumes:
+  mysql_data:
+  mongo_data:
+  grades_data:
+  billing_data:

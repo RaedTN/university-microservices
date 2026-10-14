@@ -2,6 +2,7 @@ package com.soa.apigateway.controller;
 
 import com.soa.apigateway.soap.SoapClient;
 import com.soa.apigateway.soap.SoapXml;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +19,14 @@ import java.util.Map;
 @RestController
 public class BillingRestController {
 
-    private static final String URL = "http://localhost:5064/BillingService.svc";
     private static final String NS = "http://billing.university.soa/";
 
     private final SoapClient soapClient;
+    private final String url;
 
-    public BillingRestController(SoapClient soapClient) {
+    public BillingRestController(SoapClient soapClient, @Value("${services.billing.url}") String billingUrl) {
         this.soapClient = soapClient;
+        this.url = billingUrl + "/BillingService.svc";
     }
 
     @PostMapping("/rest/billing/fees")
@@ -66,7 +68,7 @@ public class BillingRestController {
     }
 
     private Mono<ResponseEntity<Object>> call(String authorization, String body) {
-        return soapClient.call(URL, NS, body, authorization)
+        return soapClient.call(url, NS, body, authorization)
                 .map(result -> toResponse(result.status(), result.body()))
                 .onErrorResume(error -> Mono.just(entity(HttpStatus.BAD_GATEWAY, Map.of("error", "Billing service unavailable"))));
     }

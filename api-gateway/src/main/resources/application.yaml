@@ -5,6 +5,19 @@ server:
 jwt:
   secret: ${JWT_SECRET}
 
+# Hosts default to localhost. Docker Compose sets the *_SERVICE_URL variables.
+services:
+  auth:
+    url: "${AUTH_SERVICE_URL:http://localhost:8081}"
+  students:
+    url: "${STUDENT_SERVICE_URL:http://localhost:3000}"
+  grades:
+    url: "${GRADE_SERVICE_URL:http://localhost:8000}"
+  courses:
+    url: "${COURSE_SERVICE_URL:http://localhost:8082}"
+  billing:
+    url: "${BILLING_SERVICE_URL:http://localhost:5064}"
+
 spring:
   cloud:
     gateway:
@@ -13,7 +26,7 @@ spring:
           routes:
             # Auth Service - login and register are public; other /auth paths require JWT
             - id: auth
-              uri: http://localhost:8081
+              uri: "${AUTH_SERVICE_URL:http://localhost:8081}"
               predicates:
                 - Path=/auth/**
               filters:
@@ -21,7 +34,7 @@ spring:
 
             # Student Service - Protected (JWT required via GlobalFilter)
             - id: students
-              uri: http://localhost:3000
+              uri: "${STUDENT_SERVICE_URL:http://localhost:3000}"
               predicates:
                 - Path=/students/**
               filters:
@@ -30,7 +43,7 @@ spring:
 
             # Grade Service - Protected (JWT required via GlobalFilter)
             - id: grades
-              uri: http://localhost:8000
+              uri: "${GRADE_SERVICE_URL:http://localhost:8000}"
               predicates:
                 - Path=/grades/**
               filters:
@@ -38,7 +51,7 @@ spring:
 
             # Course Service - SOAP (JWT required)
             - id: courses
-              uri: http://localhost:8082
+              uri: "${COURSE_SERVICE_URL:http://localhost:8082}"
               predicates:
                 - Path=/courses, /courses/**
               filters:
@@ -49,7 +62,7 @@ spring:
 
             # Billing Service - SOAP (JWT required)
             - id: billing
-              uri: http://localhost:5064
+              uri: "${BILLING_SERVICE_URL:http://localhost:5064}"
               predicates:
                 - Path=/billing, /billing/**
               filters:

@@ -136,3 +136,20 @@ $env:JWT_SECRET = "change-me-to-a-long-shared-secret"
    - **Billing Service (SOAP) / Get WSDL** — `GET http://localhost:8088/billing?wsdl`. Expect XML.
 
 Protected student and grade calls without the environment selected return 401, because `{{jwt_token}}` is empty.
+
+## Run with Docker
+
+Copy the root `.env.example` to `.env` and set `JWT_SECRET`, `MYSQL_PASSWORD`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD`. Compose reads that file. `.env` stays out of git. The admin password must match the Postman login (`change-me` in the collection, unless you change both).
+
+Stop anything already listening on port 8088, then from the repo root:
+
+```powershell
+cd C:\Users\Raed\Desktop\projet-soa
+docker compose up --build
+```
+
+`GET http://localhost:8088/health` should return `{"status":"UP","service":"API Gateway"}`. Run the Postman collection against that URL the same way as the local setup.
+
+Only the gateway is published on 8088. Inside the Compose network the services call each other by name: `auth`, `students`, `grades`, `courses`, `billing`, `mysql`, and `mongo`. MySQL is also on `localhost:3307` and MongoDB on `localhost:27018` so you can inspect them without touching a local MySQL on 3306 or MongoDB on 27017.
+
+Auth waits for MySQL. The student service waits for MongoDB. The course service waits for MySQL. The gateway waits until auth, students, grades, courses, and billing are healthy.

@@ -1,0 +1,11 @@
+.venv
+__pycache__
+*.pyc
+*.db
+.git
+.idea
+.vscode
+*.md
+.env
+.env.*
+!.env.example
