@@ -1,0 +1,250 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --bg: #e9e0cd;
+  --surface: #ded2b9;
+  --ink: #062b8a;
+  --muted: #3a5aa8;
+  --accent: #062b8a;
+  --accent-ink: #e9e0cd;
+  --accent-press: #041f66;
+  --panel: #062b8a;
+  --panel-ink: #e9e0cd;
+  --panel-muted: #9fb4e8;
+  --panel-mark: #e9e0cd;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #07163f;
+  --surface: #102a6b;
+  --ink: #e9e0cd;
+  --muted: #c7bda6;
+  --accent: #e9e0cd;
+  --accent-ink: #07163f;
+  --accent-press: #cfc4a9;
+  --panel: #0e2360;
+  --panel-ink: #e9e0cd;
+  --panel-muted: #b9c6ec;
+  --panel-mark: #e9e0cd;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-display: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --font-sans: "Source Sans 3", "Segoe UI", sans-serif;
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-panel: var(--panel);
+  --color-panel-ink: var(--panel-ink);
+  --color-panel-muted: var(--panel-muted);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 1.125rem;
+  line-height: 1.55;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  text-wrap: balance;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rise > * {
+    animation: rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .rise > *:nth-child(2) {
+    animation-delay: 80ms;
+  }
+
+  .rise > *:nth-child(3) {
+    animation-delay: 160ms;
+  }
+
+  .rise > *:nth-child(4) {
+    animation-delay: 240ms;
+  }
+
+  .rise > *:nth-child(5) {
+    animation-delay: 320ms;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.reveal-line {
+  display: block;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .reveal-line > span {
+    display: block;
+    animation: line-rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .reveal-line:nth-of-type(2) > span {
+    animation-delay: 110ms;
+  }
+
+  .drift {
+    animation: drift 24s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes line-rise {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.07);
+  }
+}
+
+.login-slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+}
+
+.login-slide:first-child {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .login-slide {
+    opacity: 0;
+    animation: login-kenburns 32s linear infinite;
+  }
+
+  .login-slide:nth-child(1) {
+    animation-name: login-kenburns-lead;
+  }
+
+  .login-slide:nth-child(2) {
+    animation-delay: 8s;
+  }
+
+  .login-slide:nth-child(3) {
+    animation-delay: 16s;
+  }
+
+  .login-slide:nth-child(4) {
+    animation-delay: 24s;
+  }
+}
+
+@keyframes login-kenburns-lead {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  21.875% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  25% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  28.125% {
+    opacity: 0;
+    transform: scale(1.1);
+  }
+  96% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes login-kenburns {
+  0% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  3.125% {
+    opacity: 1;
+    transform: scale(1.014);
+  }
+  21.875% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  25% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  28.125% {
+    opacity: 0;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
