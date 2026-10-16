@@ -6,9 +6,6 @@ const studentRoutes = require('./routes/studentRoutes');
 const authRoutes = require('./routes/authRoutes');
 const errorHandler = require('./utils/errorHandler');
 
-// Connexion à la base de données
-connectDB();
-
 // Initialiser Express
 const app = express();
 
@@ -35,12 +32,13 @@ app.get('/api', (req, res) => {
 // Gestionnaire d'erreurs (doit être le dernier middleware)
 app.use(errorHandler);
 
-// Démarrer le serveur
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`Serveur démarré sur le port ${PORT}`);
-});
-
 module.exports = app;
+
+if (require.main === module) {
+  connectDB();
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Serveur démarré sur le port ${PORT}`);
+  });
+}
 
