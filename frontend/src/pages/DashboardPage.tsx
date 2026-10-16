@@ -2,10 +2,13 @@ import { useQuery, useQueries } from '@tanstack/react-query'
 import hall from '../assets/campus-hall.jpg'
 import quad from '../assets/campus-quad.jpg'
 import { apiGet } from '../api/client'
+import { messageFor } from '../api/queries'
 import type { BillingSummary, Course, EmailGrades, Student, StudentPage, TimetableSlot, UpToDate } from '../api/types'
 import { useAuth } from '../auth/AuthContext'
 import { Empty } from '../components/Empty'
+import { ErrorState } from '../components/ErrorState'
 import { Loading } from '../components/Loading'
+import { Fact } from '../components/Page'
 import { Table, type Column } from '../components/Table'
 
 export function DashboardPage() {
@@ -30,8 +33,15 @@ function StaffHome({ role }: { role: 'ADMIN' | 'ENSEIGNANT' }) {
 
   if (students.isLoading || courses.isLoading || slots.isLoading) return <Loading />
   if (students.isError || courses.isError || slots.isError) {
-    const message = students.error?.message || courses.error?.message || slots.error?.message
-    return <Empty title="The register did not answer" detail={message} />
+    const failing = students.isError ? students : courses.isError ? courses : slots
+    return (
+      <ErrorState
+        title="The register did not answer"
+        detail={messageFor(failing.error, 'A service behind this page did not answer.')}
+        onRetry={() => failing.refetch()}
+        retrying={failing.isFetching}
+      />
+    )
   }
 
   const courseRows = courses.data ?? []
@@ -119,18 +129,6 @@ function StaffHome({ role }: { role: 'ADMIN' | 'ENSEIGNANT' }) {
   )
 }
 
-function Fact({ value, label }: { value: number | string; label: string }) {
-  return (
-    <div>
-      <dt className="sr-only">{label}</dt>
-      <dd className="tnum font-display text-[clamp(2.5rem,4vw,3.5rem)] leading-none">{value}</dd>
-      <p aria-hidden="true" className="mt-2 text-base text-muted">
-        {label}
-      </p>
-    </div>
-  )
-}
-
 function studentColumns(
   role: 'ADMIN' | 'ENSEIGNANT',
   rows: Student[],
@@ -169,8 +167,15 @@ function StudentHome({ email }: { email: string }) {
 
   if (record.isLoading || grades.isLoading || billing.isLoading) return <Loading />
   if (record.isError || grades.isError || billing.isError) {
-    const message = record.error?.message || grades.error?.message || billing.error?.message
-    return <Empty title="Your record did not load" detail={message} />
+    const failing = record.isError ? record : grades.isError ? grades : billing
+    return (
+      <ErrorState
+        title="Your record did not load"
+        detail={messageFor(failing.error, 'A service behind this page did not answer.')}
+        onRetry={() => failing.refetch()}
+        retrying={failing.isFetching}
+      />
+    )
   }
 
   const student = record.data?.data?.[0]

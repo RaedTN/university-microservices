@@ -2,9 +2,13 @@ import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import type { Role } from './api/types'
 import { useAuth } from './auth/AuthContext'
 import { AppShell } from './layout/AppShell'
+import { BillingPage } from './pages/BillingPage'
+import { CoursesPage } from './pages/CoursesPage'
 import { DashboardPage } from './pages/DashboardPage'
+import { GradesPage } from './pages/GradesPage'
 import { LoginPage } from './pages/LoginPage'
-import { PendingPage } from './pages/PendingPage'
+import { StudentsPage } from './pages/StudentsPage'
+import { TimetablePage } from './pages/TimetablePage'
 
 export default function App() {
   return (
@@ -14,13 +18,13 @@ export default function App() {
         <Route element={<AppShell />}>
           <Route index element={<DashboardPage />} />
           <Route element={<RequireRole roles={['ADMIN', 'ENSEIGNANT']} />}>
-            <Route path="students" element={<PendingPage />} />
+            <Route path="students" element={<StudentsPage />} />
           </Route>
-          <Route path="courses" element={<PendingPage />} />
-          <Route path="timetable" element={<PendingPage />} />
-          <Route path="grades" element={<PendingPage />} />
+          <Route path="courses" element={<CoursesPage />} />
+          <Route path="timetable" element={<TimetablePage />} />
+          <Route path="grades" element={<GradesPage />} />
           <Route element={<RequireRole roles={['ADMIN', 'ETUDIANT']} />}>
-            <Route path="billing" element={<PendingPage />} />
+            <Route path="billing" element={<BillingPage />} />
           </Route>
         </Route>
       </Route>

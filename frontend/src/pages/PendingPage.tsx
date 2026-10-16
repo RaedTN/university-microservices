@@ -17,7 +17,7 @@ export function PendingPage() {
       </div>
       <img
         src={library}
-        alt="The Dr. Reuben Hecht Library at Ariel University"
+        alt="The reading room of the University of Graz library"
         className="h-72 w-full object-cover lg:h-96"
         loading="lazy"
       />

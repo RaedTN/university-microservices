@@ -13,24 +13,60 @@ export type Student = {
   lastName: string
   email: string
   dateOfBirth?: string
+  phone?: string
+  address?: string
+}
+
+export type StudentInput = {
+  studentNumber: string
+  firstName: string
+  lastName: string
+  email: string
+  dateOfBirth: string
+  phone?: string
+  address?: string
 }
 
 export type StudentPage = {
   success: boolean
   total: number
   count: number
+  page: number
+  pages: number
   data: Student[]
 }
 
+export type StudentReply = {
+  success: boolean
+  message?: string
+  data: Student
+}
+
+/** The course service is SOAP, so every field arrives as a string. */
 export type Course = {
   id?: string
   code?: string
   name?: string
+  description?: string
+  credits?: string
   professor?: string
+  semester?: string
+  maxStudents?: string
+  enrolledStudents?: string
   room?: string
   schedule?: string
-  semester?: string
-  credits?: string
+}
+
+export type CourseInput = {
+  code: string
+  name: string
+  description: string
+  credits: string
+  professor: string
+  semester: string
+  maxStudents: string
+  room: string
+  schedule: string
 }
 
 export type TimetableSlot = {
@@ -40,6 +76,19 @@ export type TimetableSlot = {
   startTime?: string
   endTime?: string
   room?: string
+}
+
+export type SlotInput = {
+  courseId: string
+  day: string
+  startTime: string
+  endTime: string
+  room: string
+}
+
+/** `deleteCourse` and `deleteTimetableSlot` answer with the SOAP boolean. */
+export type SoapBoolean = {
+  return?: string
 }
 
 export type GradeNote = {
@@ -65,6 +114,10 @@ export type BillingSummary = {
   PaidAmount?: string
   RemainingAmount?: string
   Status?: string
+  UpToDate?: string
+  PaymentId?: string
+  Date?: string
+  Amount?: string
   error?: string
 }
 

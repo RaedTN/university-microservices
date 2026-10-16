@@ -71,6 +71,13 @@ export function LoginPage() {
               Manage students, courses, grades and fees in one place.
             </p>
           </div>
+          <p className="login-credit absolute right-6 bottom-4 left-6 text-sm text-white lg:right-14 lg:bottom-6 lg:left-auto lg:max-w-sm lg:text-right">
+            Graz University Library reading room, Dr. Marcus Gossler,{' '}
+            <a className="underline underline-offset-2" href="https://creativecommons.org/licenses/by-sa/3.0/">
+              CC BY-SA 3.0
+            </a>
+            , via Wikimedia Commons.
+          </p>
         </div>
       </section>
       <section className="flex items-center bg-bg px-6 py-10 lg:px-14">
