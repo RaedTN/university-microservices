@@ -273,7 +273,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentNumber\": \"STU9001\",\n  \"firstName\": \"Samira\",\n  \"lastName\": \"Benali\",\n  \"email\": \"student@university.local\",\n  \"dateOfBirth\": \"2002-04-12\"\n}"
+							"raw": "{\n  \"studentNumber\": \"STU9001\",\n  \"firstName\": \"Demo\",\n  \"lastName\": \"Student\",\n  \"email\": \"student@university.local\",\n  \"dateOfBirth\": \"2002-04-12\"\n}"
 						},
 						"url": "http://localhost:8088/students"
 					}

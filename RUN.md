@@ -21,8 +21,8 @@ MySQL must already be running on `localhost:3306`.
 `university_db` and the `courses` table come from `init-db.sql`. From the repo root:
 
 ```powershell
-cd C:\Users\Raed\Desktop\projet-soa
-mysql -u root -p --execute="source C:/Users/Raed/Desktop/projet-soa/init-db.sql"
+cd <repository-root>
+mysql -u root -p --execute="source init-db.sql"
 ```
 
 Enter the same password as `MYSQL_PASSWORD` when prompted.
@@ -39,7 +39,7 @@ The student service expects `mongodb://localhost:27017/students`.
 ## 2. Auth service (port 8081)
 
 ```powershell
-cd C:\Users\Raed\Desktop\projet-soa\auth-service
+cd auth-service
 $env:JWT_SECRET = "change-me-to-a-long-shared-secret"
 $env:MYSQL_PASSWORD = "change-me"
 $env:ADMIN_EMAIL = "admin@university.local"
@@ -59,7 +59,7 @@ MONGODB_URI=mongodb://localhost:27017/students
 ```
 
 ```powershell
-cd C:\Users\Raed\Desktop\projet-soa\Service-Etudiant1
+cd Service-Etudiant1
 npm install
 npm start
 ```
@@ -71,7 +71,7 @@ Wait for `Serveur démarré sur le port 3000` and `MongoDB connecté`.
 Dependencies are already listed in `requirements.txt` (`PyJWT`, `aiosqlite`). The virtualenv is `.venv`.
 
 ```powershell
-cd C:\Users\Raed\Desktop\projet-soa\Grade-Service
+cd Grade-Service
 $env:JWT_SECRET = "change-me-to-a-long-shared-secret"
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 .\.venv\Scripts\uvicorn.exe main:app --host 0.0.0.0 --port 8000
@@ -82,7 +82,7 @@ Swagger (no JWT): `http://localhost:8000/docs`.
 ## 5. Course service (port 8082)
 
 ```powershell
-cd C:\Users\Raed\Desktop\projet-soa\course-service\course-service
+cd course-service\course-service
 $env:JWT_SECRET = "change-me-to-a-long-shared-secret"
 $env:MYSQL_PASSWORD = "change-me"
 .\mvnw.cmd clean package
@@ -98,7 +98,7 @@ The process starts without MySQL. The first SOAP call fails if `university_db` w
 `dotnet run` uses `Properties\launchSettings.json`, profile `http`, which binds `http://localhost:5064`.
 
 ```powershell
-cd C:\Users\Raed\Desktop\projet-soa\billing-service
+cd billing-service
 $env:JWT_SECRET = "change-me-to-a-long-shared-secret"
 dotnet run
 ```
@@ -110,7 +110,7 @@ WSDL: `http://localhost:5064/BillingService.svc?wsdl`.
 Start this last.
 
 ```powershell
-cd C:\Users\Raed\Desktop\projet-soa\api-gateway
+cd api-gateway
 $env:JWT_SECRET = "change-me-to-a-long-shared-secret"
 .\mvnw.cmd spring-boot:run
 ```
@@ -144,7 +144,7 @@ Copy the root `.env.example` to `.env` and set `JWT_SECRET`, `MYSQL_PASSWORD`, `
 Stop anything already listening on ports 8088 and 5173, including a local `npm run dev`, then from the repo root:
 
 ```powershell
-cd C:\Users\Raed\Desktop\projet-soa
+cd <repository-root>
 docker compose up --build
 ```
 

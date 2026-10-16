@@ -120,7 +120,7 @@ export function StudentsPage() {
               type="search"
               value={term}
               onChange={(event) => setTerm(event.target.value)}
-              placeholder="Benali, STU9001, @university.local"
+              placeholder="STU9001, @university.local"
               className="w-full rounded-full bg-surface py-3 pr-4 pl-11 text-ink placeholder:text-muted"
             />
           </span>

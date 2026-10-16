@@ -1,255 +1,152 @@
-# SOA Project - Manual d'Utilisation
+# UniPortal
 
-## Guide Complet pour Exécuter Tous les Services (Local, Sans Docker)
+UniPortal is a university portal built as a team project. I took that codebase, fixed it, secured it, Dockerized it, and extended it with a role-aware web interface. One gateway is the only public API. The browser talks to one origin.
 
-Ce document décrit comment démarrer tous les microservices et l'API Gateway de manière locale, avec leurs ports respectifs.
+## Architecture
 
----
+```mermaid
+flowchart LR
+  browser[Browser]
+  frontend["Frontend · nginx :5173"]
+  gateway["API gateway · :8088"]
+  auth["Auth · Spring Boot :8081"]
+  students["Students · Node :3000"]
+  grades["Grades · FastAPI :8000"]
+  courses["Courses · SOAP :8082"]
+  billing["Billing · SOAP :5064"]
+  mysql[(MySQL)]
+  mongo[(MongoDB)]
+  sqlgrades[(SQLite)]
+  sqlbilling[(SQLite)]
 
-## 📋 1. Prérequis
+  browser --> frontend
+  frontend --> gateway
+  gateway --> auth
+  gateway --> students
+  gateway --> grades
+  gateway --> courses
+  gateway --> billing
+  auth --> mysql
+  courses --> mysql
+  students --> mongo
+  grades --> sqlgrades
+  billing --> sqlbilling
+```
 
-Avant de commencer, assurez-vous d'avoir installé :
+The frontend container proxies `/auth`, `/students`, `/grades`, `/rest`, `/health`, `/courses`, and `/billing` to the gateway. Page loads on those paths still return the React app. Direct service ports stay inside the Compose network. MySQL is also published on `localhost:3307` and MongoDB on `localhost:27018` for inspection.
 
-- **Java 17+** (pour Auth Service, Course Service, API Gateway)
-- **Node.js 18+ et npm** (pour Student Service)
-- **Python 3.11+** (pour Grade Service)
-- **.NET 8 SDK** (pour Billing Service)
-- **MySQL** en cours d'exécution sur votre machine :
-  - Host: `localhost`
-  - Port: `3306`
-  - User: `root`
-  - Password: the `MYSQL_PASSWORD` environment variable (same value in every terminal that starts a MySQL service)
-- **MongoDB** installé comme service Windows
+## Tech stack
 
-### Démarrer le Service MongoDB
+| Service | Folder | Stack | Data |
+| --- | --- | --- | --- |
+| Frontend | `frontend` | React 19, TypeScript, Vite, Tailwind 4, nginx | — |
+| API gateway | `api-gateway` | Java 17, Spring WebFlux | — |
+| Auth | `auth-service` | Java 17, Spring Boot, Spring Security, JWT | MySQL `authdb` |
+| Students | `Service-Etudiant1` | Node.js, Express | MongoDB `students` |
+| Grades | `Grade-Service` | Python, FastAPI | SQLite |
+| Courses | `course-service/course-service` | Java 11, JAX-WS SOAP, exposed as REST by the gateway | MySQL `university_db` |
+| Billing | `billing-service` | .NET 8, WCF SOAP, exposed as REST by the gateway | SQLite |
 
-Ouvrez **PowerShell en tant qu'Administrateur** :
+Roles are `ADMIN`, `ENSEIGNANT`, and `ETUDIANT`. The gateway checks the JWT and forwards the caller’s email and role. A student can read only their own record, grades, and invoices.
+
+## Features by role
+
+**Administrator**
+
+- Home overview of students, courses, timetable slots, and fee accounts
+- Create, edit, and delete students
+- Publish, edit, and withdraw courses
+- Add and edit timetable slots on a weekly grid
+- Record, update, and withdraw grades for a course
+- Create invoices and record payments
+
+**Teacher**
+
+- Read the student register
+- See the courses assigned to their account, and the matching timetable
+- Enter and edit grades for those courses
+- Fees are not available
+
+**Student**
+
+- Home page with their record, grade average, and fee balance
+- Courses and timetable slots for the courses that have a grade on their email
+- Their own grades and average
+- Their own invoice and balance
+
+There is no enrollment record yet. A student’s courses are the courses that already have a grade for them.
+
+## Screenshots
+
+Place the images listed in [docs/screenshots](docs/screenshots/README.md) beside that note. The links below use those file names.
+
+| Sign in | Home |
+| --- | --- |
+| ![Sign in](docs/screenshots/login.png) | ![Administrator home](docs/screenshots/home.png) |
+
+| Students | Courses |
+| --- | --- |
+| ![Students](docs/screenshots/students.png) | ![Courses](docs/screenshots/courses.png) |
+
+| Timetable | Grades |
+| --- | --- |
+| ![Timetable](docs/screenshots/timetable.png) | ![Grades](docs/screenshots/grades.png) |
+
+![Fees](docs/screenshots/fees.png)
+
+## Quick start
+
+Docker and a copy of the environment file are enough.
 
 ```powershell
-Start-Service -Name "MongoDB"
+copy .env.example .env
+docker compose up --build
 ```
 
----
+Open http://localhost:5173.
 
-## 🔐 2. Auth Service (Spring Boot)
+`.env.example` contains placeholders only. Set your own `JWT_SECRET` before you use the stack anywhere other than your machine. The same value must be shared by every service. `.env` is gitignored.
 
-- **Dossier** : `auth-service`
-- **Port** : `8081`
-- **Rôle** : Enregistrement et authentification des utilisateurs (JWT)
+`GET http://localhost:8088/health` still reaches the gateway directly and should return `{"status":"UP","service":"API Gateway"}`.
 
-### Commandes (PowerShell) :
+For a service-by-service run without Docker, see [RUN.md](RUN.md). For frontend work with hot reload, stop the frontend container and run `npm run dev` in `frontend`. The dev server uses the same host port, 5173.
 
-```powershell
-cd C:\Users\Raed\Desktop\projet-soa\auth-service
-.\mvnw.cmd spring-boot:run
-```
+## Demo accounts
 
-Le service sera disponible à `http://localhost:8081`.
+These accounts are for a local demo. They are not real people. Change the passwords before the stack is reachable by anyone else.
 
----
+| Role | Email | Password | Where it comes from |
+| --- | --- | --- | --- |
+| Administrator | `admin@university.local` | `change-me` | Created on first auth startup from `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `.env` |
+| Teacher | `teacher@university.local` | `password123` | Postman request **Create Teacher** |
+| Student | `student@university.local` | `password123` | Postman request **Register Student** |
 
-## 👥 3. Student Service (Node.js + Express)
+The administrator password in the table matches `.env.example`. If you change `.env`, use that password instead. The teacher and student rows are the sample bodies in the Postman collection, not accounts that Compose creates by itself.
 
-- **Dossier** : `Service-Etudiant1`
-- **Port** : `3000`
-- **Base de données** : MongoDB (`mongodb://localhost:27017/student_db`)
-- **Chemin API de base** : `/api/students`
+## API testing
 
-### Première fois uniquement (pour installer les dépendances) :
+Import both files into Postman:
 
-```powershell
-cd C:\Users\Raed\Desktop\projet-soa\Service-Etudiant1
-npm install
-```
+- `SOA-Project-Postman-Collection.json` — 23 requests
+- `SOA-Project-Postman-Environment.json` — base URL `http://localhost:8088`, empty token variables
 
-### Exécuter le service :
+Select the environment **SOA Project Environment**. Login requests store the JWT. The collection is grouped as:
 
-```powershell
-cd C:\Users\Raed\Desktop\projet-soa\Service-Etudiant1
-npm start
-```
+| Group | Requests |
+| --- | --- |
+| Health and gateway info | 2 |
+| Auth | 5 |
+| Students | 4 |
+| Grades | 2 |
+| Courses and timetable | 4 |
+| Billing | 4 |
+| SOAP WSDL | 2 |
 
-Vous devriez voir quelque chose comme :
+Run health, then login, then the protected calls. A protected call with an empty token returns 401.
 
-```text
-Serveur démarré sur le port 3000
-MongoDB connecté: localhost
-```
+## Next improvements
 
-Les endpoints du service sont accessibles sous `http://localhost:3000/api/...`.
-
----
-
-## 📊 4. Grade Service (FastAPI + Python)
-
-- **Dossier** : `Grade-Service`
-- **Port** : `8000`
-- **Base de données** : SQLite (fichier `grades.db`)
-- **JWT Secret** : la variable d'environnement `JWT_SECRET`, la même valeur que l'API Gateway, Auth Service et Student Service
-
-### Créer/activer l'environnement virtuel et installer les dépendances (première fois) :
-
-```powershell
-cd C:\Users\Raed\Desktop\projet-soa\Grade-Service
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-```
-
-### Exécuter avec le bon secret JWT :
-
-```powershell
-cd C:\Users\Raed\Desktop\projet-soa\Grade-Service
-.\.venv\Scripts\Activate.ps1
-$env:JWT_SECRET = "<la même valeur que dans les autres services>"
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
-
-Documentation Swagger disponible à `http://localhost:8000/docs`.
-
----
-
-## 📚 5. Course Service (Java SOAP)
-
-- **Dossier** : `course-service\course-service`
-- **Port** : `8082`
-- **Base de données** : MySQL `university_db` sur `localhost:3306`
-
-### Compiler et exécuter :
-
-```powershell
-cd C:\Users\Raed\Desktop\projet-soa\course-service\course-service
-.\mvnw.cmd clean package
-java -jar target/course-service-1.0-SNAPSHOT.jar
-```
-
-Service SOAP disponible à `http://localhost:8082/course-service`  
-WSDL disponible à `http://localhost:8082/course-service?wsdl`.
-
----
-
-## 💰 6. Billing Service (.NET SOAP)
-
-- **Dossier** : `billing-service`
-- **Port** : `5064`
-
-### Exécuter :
-
-```powershell
-cd C:\Users\Raed\Desktop\projet-soa\billing-service
-dotnet run
-```
-
-Service disponible à `http://localhost:5064/BillingService.svc`  
-WSDL disponible à `http://localhost:5064/BillingService.svc?wsdl`.
-
----
-
-## 🌐 7. API Gateway (Spring Cloud Gateway)
-
-- **Dossier** : `api-gateway`
-- **Port** : `8088`
-- **JWT Secret** : la variable d'environnement `JWT_SECRET`, la même valeur que Auth, Grade et Student Service
-
-### Exécuter :
-
-```powershell
-cd C:\Users\Raed\Desktop\projet-soa\api-gateway
-.\mvnw.cmd spring-boot:run
-```
-
-Vérification de santé disponible à `http://localhost:8088/health`  
-Informations sur la passerelle disponibles à `http://localhost:8088/`.
-
----
-
-## 🔌 8. Résumé des Ports
-
-| Service | Port |
-|---------|------|
-| **API Gateway** | `8088` |
-| **Auth Service** | `8081` |
-| **Student Service** | `3000` |
-| **Grade Service** | `8000` |
-| **Course Service** | `8082` |
-| **Billing Service** | `5064` |
-| **MySQL** | `3306` |
-| **MongoDB** | `27017` |
-
----
-
-## 🚀 9. Accéder aux Services via l'API Gateway
-
-Une fois tous les services démarrés, vous pouvez accéder aux services via l'API Gateway :
-
-### Auth (Public)
-- `POST http://localhost:8088/auth/register`
-- `POST http://localhost:8088/auth/login`
-
-### Students (JWT requis)
-- `GET  http://localhost:8088/students`
-- `GET  http://localhost:8088/students/{id}`
-- `POST http://localhost:8088/students`
-
-### Grades (JWT requis)
-- `GET  http://localhost:8088/grades/student/{studentId}`
-- `POST http://localhost:8088/grades`
-
-### Courses (JWT requis, SOAP et REST)
-- `GET  http://localhost:8088/courses?wsdl`
-- `GET  http://localhost:8088/rest/courses`
-- `GET  http://localhost:8088/rest/timetable`
-
-### Billing (JWT requis, SOAP et REST)
-- `GET  http://localhost:8088/billing?wsdl`
-- `GET  http://localhost:8088/rest/billing/status?studentId=student@example.com`
-
-### Overview (JWT requis)
-- `GET  http://localhost:8088/students/{id}/overview`
-
----
-
-## 📝 Notes Importantes
-
-1. **Ordre de démarrage recommandé** :
-   1. MySQL (déjà en cours d'exécution)
-   2. MongoDB (démarrer le service)
-   3. Auth Service
-   4. Student Service
-   5. Grade Service
-   6. Course Service
-   7. Billing Service
-   8. API Gateway (en dernier)
-
-2. **JWT Secret** : la même variable `JWT_SECRET` pour Auth Service, API Gateway, Grade Service et Student Service. Le mot de passe MySQL est `MYSQL_PASSWORD`. Voir `.env.example` à la racine et `RUN.md`.
-
-3. **Base de données** :
-   - MySQL doit être démarré avant Course Service et Auth Service
-   - MongoDB doit être démarré avant Student Service
-
-4. **Environnement virtuel Python** : N'oubliez pas d'activer l'environnement virtuel avant d'exécuter le Grade Service.
-
----
-
-## 🐛 Dépannage
-
-### Erreur : "MongoDB connection refused"
-- Vérifiez que le service MongoDB est démarré : `Get-Service -Name "MongoDB"`
-
-### Erreur : "MySQL connection refused"
-- Vérifiez que MySQL est en cours d'exécution sur `localhost:3306`
-
-### Erreur : "401 Unauthorized" ou "Invalid token"
-- Vérifiez que le `JWT_SECRET` est identique dans tous les services
-- Assurez-vous d'utiliser un token JWT valide obtenu via `/auth/login`
-
-### Erreur : "404 Not Found" depuis l'API Gateway
-- Vérifiez que le service backend correspondant est démarré
-- Vérifiez les routes dans `api-gateway/src/main/resources/application.yaml`
-
----
-
-## 📧 Support
-
-Pour toute question ou problème, consultez les logs de chaque service pour plus de détails.
-
+- An enrollment model, so a student can be on a course before a grade exists
+- One grades-by-course endpoint and one billing list endpoint, so staff pages do not call the API once per student
+- Automated tests and a CI pipeline
+- Token refresh and a shorter JWT lifetime
