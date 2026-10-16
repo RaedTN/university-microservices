@@ -141,15 +141,19 @@ Protected student and grade calls without the environment selected return 401, b
 
 Copy the root `.env.example` to `.env` and set `JWT_SECRET`, `MYSQL_PASSWORD`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD`. Compose reads that file. `.env` stays out of git. The admin password must match the Postman login (`change-me` in the collection, unless you change both).
 
-Stop anything already listening on port 8088, then from the repo root:
+Stop anything already listening on ports 8088 and 5173, including a local `npm run dev`, then from the repo root:
 
 ```powershell
 cd C:\Users\Raed\Desktop\projet-soa
 docker compose up --build
 ```
 
-`GET http://localhost:8088/health` should return `{"status":"UP","service":"API Gateway"}`. Run the Postman collection against that URL the same way as the local setup.
+Open http://localhost:5173 and sign in. nginx serves the built app and is the only origin the browser talks to. It forwards `/auth`, `/students`, `/grades`, `/rest`, `/health`, `/courses`, and `/billing` to the gateway container. When the browser is loading one of those addresses as a page, nginx returns `index.html` so React Router can take over.
 
-Only the gateway is published on 8088. Inside the Compose network the services call each other by name: `auth`, `students`, `grades`, `courses`, `billing`, `mysql`, and `mongo`. MySQL is also on `localhost:3307` and MongoDB on `localhost:27018` so you can inspect them without touching a local MySQL on 3306 or MongoDB on 27017.
+`GET http://localhost:8088/health` still reaches the gateway directly and should return `{"status":"UP","service":"API Gateway"}`. Run the Postman collection against that URL the same way as the local setup.
+
+For frontend work with hot reload, stop the frontend container and, from `frontend`, run `npm install` once and then `npm run dev`. Leave `VITE_API_URL` empty. Vite serves http://localhost:5173 and proxies those same paths to http://localhost:8088. The container and the dev server both use host port 5173, so only one of them can be running.
+
+Only the gateway is published on 8088 and the frontend on 5173. Inside the Compose network the services call each other by name: `auth`, `students`, `grades`, `courses`, `billing`, `gateway`, `mysql`, and `mongo`. MySQL is also on `localhost:3307` and MongoDB on `localhost:27018` so you can inspect them without touching a local MySQL on 3306 or MongoDB on 27017.
 
 Auth waits for MySQL. The student service waits for MongoDB. The course service waits for MySQL. The gateway waits until auth, students, grades, courses, and billing are healthy.
