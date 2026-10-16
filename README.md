@@ -1,5 +1,7 @@
 # UniPortal
 
+[![CI](https://github.com/RaedTN/university-microservices/actions/workflows/ci.yml/badge.svg)](https://github.com/RaedTN/university-microservices/actions/workflows/ci.yml)
+
 UniPortal is a university portal built as a team project. I took that codebase, fixed it, secured it, Dockerized it, and extended it with a role-aware web interface. One gateway is the only public API. The browser talks to one origin.
 
 ## Architecture
@@ -78,8 +80,6 @@ There is no enrollment record yet. A student’s courses are the courses that al
 
 ## Screenshots
 
-Place the images listed in [docs/screenshots](docs/screenshots/README.md) beside that note. The links below use those file names.
-
 | Sign in | Home |
 | --- | --- |
 | ![Sign in](docs/screenshots/login.png) | ![Administrator home](docs/screenshots/home.png) |
@@ -148,5 +148,4 @@ Run health, then login, then the protected calls. A protected call with an empty
 
 - An enrollment model, so a student can be on a course before a grade exists
 - One grades-by-course endpoint and one billing list endpoint, so staff pages do not call the API once per student
-- Automated tests and a CI pipeline
 - Token refresh and a shorter JWT lifetime

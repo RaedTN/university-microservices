@@ -157,3 +157,36 @@ For frontend work with hot reload, stop the frontend container and, from `fronte
 Only the gateway is published on 8088 and the frontend on 5173. Inside the Compose network the services call each other by name: `auth`, `students`, `grades`, `courses`, `billing`, `gateway`, `mysql`, and `mongo`. MySQL is also on `localhost:3307` and MongoDB on `localhost:27018` so you can inspect them without touching a local MySQL on 3306 or MongoDB on 27017.
 
 Auth waits for MySQL. The student service waits for MongoDB. The course service waits for MySQL. The gateway waits until auth, students, grades, courses, and billing are healthy.
+
+## Tests
+
+These run on the machine, without Docker. Each command starts from the repository root.
+
+```powershell
+cd auth-service
+.\mvnw.cmd test
+```
+
+```powershell
+cd api-gateway
+.\mvnw.cmd test
+```
+
+```powershell
+cd Grade-Service
+python -m pip install -r requirements.txt -r requirements-dev.txt
+python -m pytest
+```
+
+```powershell
+cd Service-Etudiant1
+npm install
+npm test
+```
+
+```powershell
+cd frontend
+npm install
+npm run lint
+npm run build
+```
